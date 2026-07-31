@@ -1,5 +1,8 @@
-<!-- SOURCE: https://picovoice.ai/docs/quick-start/porcupine-android/ | FETCHED: 2026-07-31 | FORMAT: text-extract -->
-<!-- Full page size: ~932 KB HTML. Text extract below focuses on requirements, AccessKey, usage. -->
+<!-- SOURCE: https://picovoice.ai/docs/quick-start/porcupine-android/ | FETCHED: 2026-07-31 | FORMAT: full-page-text-extraction -->
+<!-- Extraction complète du texte de la page, de l'en-tête au pied de page (© 2019-2026 Picovoice Inc.). -->
+<!-- Toutes les sections sont présentes : Requirements, AccessKey, Setup, Usage, Custom Keywords, -->
+<!-- Non-English Languages, Train Models over API, Demo, Resources. -->
+<!-- Note audit : la page ne documente pas la raison de la permission INTERNET (voir licences-wake.md §1). -->
 
 Porcupine Wake Word Android Quick Start Platforms Android (5.0+, API 21+) Requirements Picovoice Account and AccessKey Android Studio Android device with USB debugging enabled or Android simulator Picovoice Account &amp; AccessKey Signup or Login to Picovoice Console to get your AccessKey .
 Make sure to keep your AccessKey secret. Quick Start Setup Install Android Studio . Include mavenCentral() repository in the top-level build.gradle . Then add the following to the app&#x27;s build.gradle : dependencies { // ... implementation &#x27;ai.picovoice:porcupine-android:${LATEST_VERSION}&#x27; // replace with latest version } Add the following to the app&#x27;s AndroidManifest.xml file to enable recording with an Android device&#x27;s microphone: &lt; uses-permission android: name = &quot; android.permission.INTERNET &quot; /&gt; &lt; uses-permission android: name = &quot; android.permission.RECORD_AUDIO &quot; /&gt; Usage Use the PorcupineManager Builder to create an instance of PorcupineManager that detects the included built-in wake words porcupine and bumblebee : import ai.picovoice.porcupine.*; 

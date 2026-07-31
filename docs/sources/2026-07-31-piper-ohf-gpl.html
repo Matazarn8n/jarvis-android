@@ -1,0 +1,77 @@
+<!-- SOURCE: https://github.com/OHF-Voice/piper1-gpl | FETCHED: 2026-07-31 -->
+<!-- CONTEXT: Dépôt actif Piper TTS (GPL v3) — Open Home Foundation, développement migré depuis rhasspy/piper -->
+
+=== README (OHF-Voice/piper1-gpl, branche main) ===
+
+![Piper](etc/logo.png)
+
+A fast and local neural text-to-speech engine that embeds [espeak-ng] for phonemization.
+
+Install with:
+
+  pip install piper-tts
+
+Features:
+* Samples       : https://rhasspy.github.io/piper-samples
+* Demo          : https://rhasspy.github.io/piper-samples/demo.html
+* Voices        : https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/VOICES.md
+* CLI           : https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/CLI.md
+* Web server    : https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/API_HTTP.md
+* Python API    : https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/API_PYTHON.md
+* C/C++ API     : https://github.com/OHF-Voice/piper1-gpl/tree/main/libpiper
+* Training new voices : https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/TRAINING.md
+* Building manually   : https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/BUILDING.md
+
+---
+
+## Looking for Maintainers
+
+The Open Home Foundation is looking for maintainers for Piper! If you're interested,
+please send a message to voice@openhomefoundation.org
+
+---
+
+Projects using Piper:
+- Home Assistant, NVDA, LocalAI, Open Voice OS, mintPiper, Basic TTS, etc.
+
+[![A library from the Open Home Foundation](https://www.openhomefoundation.org/badges/ohf-library.png)]
+(https://www.openhomefoundation.org/)
+
+=== LICENSE / COPYING (OHF-Voice/piper1-gpl, main/COPYING) : GNU GPL v3 ===
+
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+                            Preamble
+
+  The GNU General Public License is a free, copyleft license for
+software and other kinds of works.
+
+  The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+the GNU General Public License is intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users.
+
+  When we speak of free software, we are referring to freedom, not
+price.  Our General Public Licenses are designed to make sure that you
+have the freedom to distribute copies of free software (and charge for
+them if you wish), that you receive source code or can get it if you
+want it, that you can change the software or use pieces of it in new
+free programs, and that you know you can do these things.
+
+  [Suite du texte GPL v3 standard — cf. https://www.gnu.org/licenses/gpl-3.0.txt]
+
+=== RÉSUMÉ ===
+
+- Licence : GNU General Public License v3 (GPL-3.0, copyleft fort)
+- Statut  : Développement actif, maintenu par Open Home Foundation
+- Impact  : Intégrer le runtime Piper dans une app closed-source est incompatible avec GPL v3.
+            Si Piper est utilisé UNIQUEMENT comme outil de génération de données synthétiques
+            (build step hors-ligne, non lié au runtime Android), les poids ONNX générés ne
+            sont probablement pas des œuvres dérivées de Piper — à valider juridiquement.
+            Alternative permissive : VITS (MIT), Coqui TTS (MPL 2.0).
