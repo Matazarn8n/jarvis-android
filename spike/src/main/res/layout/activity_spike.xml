@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp"
+    android:background="#121212">
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Jarvis Spike — P0"
+        android:textColor="#FFFFFF"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Score affiché en temps réel (mis à jour par BroadcastReceiver) -->
+    <TextView
+        android:id="@+id/tvScore"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Score : —"
+        android:textColor="#00E5FF"
+        android:textSize="28sp"
+        android:gravity="center"
+        android:fontFamily="monospace"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Compteur de détections au-dessus du seuil -->
+    <TextView
+        android:id="@+id/tvDetections"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Détections : 0"
+        android:textColor="#69FF47"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Chemin du fichier journal -->
+    <TextView
+        android:id="@+id/tvJournal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Journal : —"
+        android:textColor="#AAAAAA"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:layout_marginBottom="48dp" />
+
+    <!-- Bouton Armer / Désarmer -->
+    <Button
+        android:id="@+id/btnToggle"
+        android:layout_width="200dp"
+        android:layout_height="60dp"
+        android:text="Armer"
+        android:textSize="18sp"
+        android:backgroundTint="#FF4081" />
+
+</LinearLayout>

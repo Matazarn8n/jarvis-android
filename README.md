@@ -17,6 +17,29 @@ cd /home/nuveo/projects/jarvis-android
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
+## Spike P0 (instrument de mesure — JA-T5)
+
+APK jetable `com.agenterie.jarvis.spike` — ne pas fusionner dans `:app`.
+Réutilise WakePipeline + WakeGate via source set partagé (pas de duplication).
+
+```bash
+# Construire
+./gradlew --console=plain :spike:assembleDebug
+# → spike/build/outputs/apk/debug/spike-debug.apk
+
+# Installer (wireless debugging ou USB requis)
+adb install -r spike/build/outputs/apk/debug/spike-debug.apk
+
+# Démarrer l'activité
+adb shell am start -n com.agenterie.jarvis.spike/.SpikeActivity
+
+# Vérifier le service vivant
+adb shell dumpsys activity services com.agenterie.jarvis.spike
+
+# Collecter les mesures après session
+./scripts/pull_measures.sh <SESSION_LABEL>
+```
+
 Toolchain du GEEKOM (constatée le 2026-07-31) : SDK `/home/nuveo/.local/android-sdk`
 (platforms android-35/36, build-tools 34.0.0 + 35.0.0), JDK 21, wrapper Gradle
 8.14.3, AGP 8.13.0, Kotlin 2.0.21. `local.properties` (non versionné) porte

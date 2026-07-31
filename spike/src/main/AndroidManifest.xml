@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Permissions requises par le FGS microphone (target 34+) -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <!-- POST_NOTIFICATIONS requis à l'exécution sur Android 13+ (API 33+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:label="Jarvis Spike"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+
+        <!--
+          SpikeActivity — seul point d'entrée.
+          Le FGS DOIT être démarré depuis l'activité visible (target 34+) :
+          démarrage depuis l'arrière-plan → SecurityException.
+        -->
+        <activity
+            android:name=".SpikeActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+          SpikeWakeService — foreground service type "microphone".
+          Tourne en premier plan avec une notification permanente sur le canal dédié.
+        -->
+        <service
+            android:name=".SpikeWakeService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
+
+    </application>
+
+</manifest>

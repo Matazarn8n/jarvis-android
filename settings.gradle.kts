@@ -13,4 +13,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "jarvis-android"
-include(":app")
+include(":app", ":spike")

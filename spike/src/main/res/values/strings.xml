@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Jarvis Spike</string>
+    <string name="btn_arm">Armer</string>
+    <string name="btn_disarm">Désarmer</string>
+    <string name="label_score">Score : —</string>
+    <string name="label_detections">Détections : 0</string>
+    <string name="label_journal">Journal : —</string>
+    <string name="notif_channel_name">Écoute wake-word (spike)</string>
+    <string name="notif_channel_desc">Notification permanente du service de mesure P0</string>
+    <string name="notif_title">Jarvis Spike</string>
+    <string name="notif_text_idle">Armé — en écoute…</string>
+</resources>
