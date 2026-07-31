@@ -1,0 +1,8 @@
+{
+  "model": "hey_jarvis_v0.1",
+  "threshold": 0.5,
+  "refractory_ms": 3000,
+  "sample_rate": 16000,
+  "chunk_ms": 100,
+  "source": "openwakeword resources/models (CC BY-NC-SA 4.0), parité HP Engage jarvis_wake"
+}

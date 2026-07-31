@@ -35,6 +35,20 @@ ro.build.version.release=
 ro.build.version.sdk=
 ```
 
+## Assets wake-word
+
+Les modèles ONNX et leur configuration sont dans `app/src/main/assets/wake/` :
+
+- `hey_jarvis_v0.1.onnx` — graphe de détection du mot-clé
+- `melspectrogram.onnx` — extracteur de features audio
+- `embedding_model.onnx` — embeddings partagés
+- `wake.json` — seuil, période réfractaire et métadonnées
+
+Pour remplacer le modèle : déposer un nouveau `.onnx` dans ce dossier et mettre
+à jour `wake.json` (champs `model`, `threshold`, `refractory_ms`). Rien d'autre
+dans le code ne connaît le modèle. Licence des poids : CC BY-NC-SA 4.0 (voir
+`NOTICE.md` et `docs/licences-wake.md`).
+
 ## État
 
 - **P0** (spike détection + licences) : en cours — tickets JA-T2 … JA-T7.
