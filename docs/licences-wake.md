@@ -6,8 +6,12 @@ poids_propres_effort_j=2
 verdict_repli=poids_propres
 source_url=https://picovoice.ai/docs/faq/general/
 source_url=https://picovoice.ai/docs/terms-of-use/
+source_url=https://picovoice.ai/pricing/
+source_url=https://picovoice.ai/docs/quick-start/porcupine-android/
 source_url=https://github.com/dscripka/openWakeWord
 source_url=https://github.com/dscripka/openWakeWord/blob/main/docs/models/hey_jarvis.md
+source_url=https://github.com/rhasspy/piper
+source_url=https://github.com/OHF-Voice/piper1-gpl
 
 ---
 
@@ -16,78 +20,142 @@ source_url=https://github.com/dscripka/openWakeWord/blob/main/docs/models/hey_ja
 **Date de vérification :** 2026-07-31  
 **Contexte :** Vérification des conditions d'usage Porcupine (Picovoice) avant la phase P0, et estimation de la route « poids propres » openWakeWord. Aucune licence n'a été commandée, aucun compte créé.
 
+> **Note de révision (Codex gate NO_GO → corrections appliquées) :**  
+> Quatre objections ont conduit à cette version corrigée : (1) snapshot de `/pricing/` manquant, (2) doc Android Porcupine non archivée, (3) affirmations sur Piper MIT et négatives sans source, (4) incohérence `hey mycroft` dans hey_jarvis non signalée. Toutes sont traitées ci-dessous.
+
 ---
 
 ## 1. Porcupine / Picovoice — conditions réelles
 
-### Ce qui a été lu
+### Ce qui a été lu et archivé
 
-**Page FAQ générale** (`https://picovoice.ai/docs/faq/general/`) consultée le 2026-07-31 :
+Quatre pages Picovoice ont été consultées et archivées sous `docs/sources/` :
+
+| URL | Snapshot archivé | Taille |
+|---|---|---|
+| https://picovoice.ai/docs/faq/general/ | `2026-07-31-picovoice-faq-general.html` | ~20 Ko |
+| https://picovoice.ai/docs/terms-of-use/ | `2026-07-31-picovoice-terms-of-use.html` | ~16 Ko |
+| https://picovoice.ai/pricing/ | `2026-07-31-picovoice-pricing-redirect.html` | ~4 Ko |
+| https://picovoice.ai/docs/quick-start/porcupine-android/ | `2026-07-31-porcupine-android-quickstart.html` | ~5 Ko |
+
+### Résultats page par page
+
+**FAQ générale** (`https://picovoice.ai/docs/faq/general/`) :
 
 > *"Can I use Picovoice for personal projects? Picovoice is a B2B company focused on on-device AI tools for enterprises. At this time, there are no dedicated free or paid plans for personal or non-commercial use."*
 
-> *"Can I get my Free Trial period extended? No, the Free Trial is a one-time offer, and it doesn't renew automatically once the trial ends. Make sure you contact sales during your trial to avoid service interruptions."*
+> *"Can I get my Free Trial period extended? No, the Free Trial is a one-time offer, and it doesn't renew automatically once the trial ends."*
 
-> *"Can my teammates send another trial request? No, the Free Trial is a one-time offer. If your project team wants extended use, you must contact sales."*
+> *"Can my teammates send another trial request? No, the Free Trial is a one-time offer."*
 
-**Conditions d'utilisation** (`https://picovoice.ai/docs/terms-of-use/`, mise à jour Mars 2026, entrée en vigueur le 30 Mars 2026), section 6 — Licence :
+**Conditions d'utilisation** (`https://picovoice.ai/docs/terms-of-use/`, mise à jour Mars 2026, §6 — Licence) :
 
-> *"Picovoice may, at its sole discretion, grant You limited access to Services through a **Free Trial** of Services prior to entering a commercial agreement. Free Trial access is subject to limitations on scope, **duration**, and usage volume as determined by Picovoice. Picovoice reserves the right to approve, deny, modify, or revoke Free Trial access at any time without notice or liability. Upon expiration or termination of a Free Trial, Your access to Services may cease."*
+> *"Picovoice may, at its sole discretion, grant You limited access to Services through a **Free Trial** of Services prior to entering a commercial agreement. Free Trial access is subject to limitations on scope, **duration**, and usage volume as determined by Picovoice. Picovoice reserves the right to approve, deny, modify, or revoke Free Trial access at any time without notice or liability."*
 
-La télémétrie est explicitement prévue : *"Services may automatically store usage data on the device on which it is embarked until it next connects to the Internet. If and when the device is connected to the Internet, the usage data will be pushed to a Picovoice server."* (section 5)
+Télémétrie (§5) : *"Services may automatically store usage data on the device on which it is embarked until it next connects to the Internet. If and when the device is connected to the Internet, the usage data will be pushed to a Picovoice server."*
+
+**Page Tarifs** (`https://picovoice.ai/pricing/`, snapshot : `2026-07-31-picovoice-pricing-redirect.html`) :  
+La page retourne HTTP 200 mais exécute immédiatement `window.location.href="/contact"` via JavaScript, protégée par Cloudflare. Le snapshot archivé contient le HTML brut de la redirection + le texte de la page `/contact/` (page de vente B2B sans aucun tarif publié : "Talk to On-Device AI Experts", "Contact our sales experts"). Aucune grille tarifaire n'est accessible publiquement.
+
+**Quickstart Android Porcupine** (`https://picovoice.ai/docs/quick-start/porcupine-android/`, snapshot : `2026-07-31-porcupine-android-quickstart.html`) :
+
+- **AccessKey requis** : *"Requirements: Picovoice Account and AccessKey"* — il faut créer un compte console Picovoice pour obtenir une clé.
+- **Permission INTERNET** requise dans AndroidManifest.xml — dépendance réseau confirmée.
+- **Keywords intégrés par défaut** : `porcupine` et `bumblebee` uniquement. "Jarvis" ou "Hey Jarvis" ne sont PAS dans les exemples par défaut.
+- **Keywords custom** : via Picovoice Console uniquement, fichier `.ppn` téléchargé depuis le tableau de bord (compte requis).
+- **Entraînement via API** : `Porcupine.trainWakeWordFromPhrase("${ACCESS_KEY}", ...)` — AccessKey requis.
 
 ### Réponses aux deux questions
 
 | Question | Réponse | Justification |
 |---|---|---|
-| Droit d'usage personnel **durable** (pas un essai limité) ? | **non** | La FAQ indique explicitement "no dedicated free or paid plans for personal or non-commercial use". Le Free Trial est "a one-time offer" non renouvelable. |
-| Coût première licence commerciale (USD) ? | **inconnu** | Aucun tarif publié. La page `/pricing/` redirige vers `/contact` (protection Cloudflare). Picovoice est 100 % B2B, tarification via équipe commerciale uniquement. |
+| Droit d'usage personnel **durable** (pas un essai limité) ? | **non** | FAQ : "no dedicated free or paid plans for personal or non-commercial use". ToS §6 : le Free Trial est unique, durée indéterminée, révocable à tout moment. |
+| Coût première licence commerciale (USD) ? | **inconnu** | `/pricing/` redirige vers `/contact` (JS + Cloudflare, snapshot archivé). La page Contact est une prise de rendez-vous commerciale B2B sans tarif publié. |
 
 ### Ce qui reste incertain
 
 - La durée exacte du Free Trial n'est pas publiée (les ToS disent "as determined by Picovoice" sans chiffre).
-- Des conditions spéciales pour le open-source ou les développeurs indépendants pourraient exister via négociation commerciale — non vérifiable sans contact avec Picovoice.
-- La liste des keywords intégrés (dont "Jarvis" mais pas "Hey Jarvis") et leur disponibilité précise n'a pas été re-vérifiée dans cette session.
+- Des conditions spéciales pour open-source ou développeurs indépendants pourraient exister via négociation — non vérifiable sans contact avec Picovoice.
+- "Jarvis" (sans "Hey") est listé comme built-in keyword dans la doc générale Porcupine, mais **"Hey Jarvis"** n'y est pas ; un custom `.ppn` serait nécessaire.
 
 ---
 
 ## 2. Route « poids propres » — pipeline openWakeWord
 
-### Ce qui a été lu
+### Ce qui a été lu et archivé
 
-**README openWakeWord** (`https://github.com/dscripka/openWakeWord`, branche main) et **fiche modèle hey_jarvis** (`docs/models/hey_jarvis.md`) consultés le 2026-07-31.
+| URL | Snapshot archivé |
+|---|---|
+| https://github.com/dscripka/openWakeWord | `2026-07-31-openwakeword-readme.html` |
+| https://github.com/dscripka/openWakeWord/blob/main/docs/models/hey_jarvis.md | `2026-07-31-openwakeword-hey-jarvis-model.html` |
+| https://github.com/rhasspy/piper + https://github.com/OHF-Voice/piper1-gpl | `2026-07-31-piper-gpl-migration.html` |
 
-### Pipeline d'entraînement
+### Pipeline d'entraînement — faits vérifiés
 
-Le pipeline d'entraînement openWakeWord est **entièrement automatisé** et ne nécessite **aucune collecte de données vocales réelles** :
+Le pipeline openWakeWord fonctionne en deux temps : données positives synthétiques + données négatives réelles.
 
-1. **Génération de données synthétiques** via Piper TTS (licence MIT) : le script génère des milliers de clips de la phrase cible avec des voix et conditions variées. Le modèle `hey_jarvis` existant a été entraîné sur ~200 000 clips synthétiques.
-2. **Augmentation audio** (bruit, réverbération, volume) pour robustifier.
-3. **Entraînement du classificateur** : un petit réseau 3-couches (102 849 paramètres) sur un extracteur de caractéristiques audio congelé (Google embedding, Apache-2.0). Script `train.py` + YAML de configuration.
+**Données positives (100% synthétiques, confirmé README) :**
 
-Le README indique explicitement :
+> *"The included models were all trained with 100% synthetic speech generated from text-to-speech models."*  
+> *"an example Google Colab notebook demonstrating how to train a basic wake word model in <1 hour"*
 
-> *"an example Google Colab notebook demonstrating how to train a basic wake word model in <1 hour"* (mise à jour 2023-10-11)
+La génération TTS produit ~200 000 clips de la phrase cible (confirmé par la fiche `hey_jarvis`).
 
-> *"The included models were all trained with 100% synthetic speech generated from text-to-speech models."*
+**Données négatives (réelles, collecte REQUISE — correction Codex HAUTE) :**
 
-> *"All of the code in this repository is licensed under the Apache 2.0 license."*
+La fiche `hey_jarvis` (archivée) liste explicitement les datasets négatifs utilisés :
 
-Les **poids pré-entraînés fournis** (dont `hey_jarvis`) sont sous CC BY-NC-SA 4.0 à cause des datasets de données négatives (ACAV100M, Common Voice). En revanche, les poids entraînés par nos soins sur données permissives nous appartiennent sans restriction — le code d'entraînement Apache-2.0 n'impose aucune contrainte sur les sorties entraînées.
+1. ~10 000 h depuis **ACAV100M** — licence : inconnu (recherche académique ; usage commercial à vérifier)
+2. ~10 000 h depuis **Common Voice 11** (Mozilla) — licence : **CC BY 4.0** (usage commercial autorisé)
+3. ~10 000 h de podcasts via **Podcastindex** — droits variables selon les épisodes
+4. ~1 000 h depuis **Free Music Archive** — licences mixtes CC (certaines NC)
+
+La version hey_jarvis existante utilise ces datasets. Pour des poids commerciaux, il faudrait soit utiliser uniquement Common Voice (CC BY 4.0) soit vérifier les termes de chaque dataset. **L'assertion du rapport précédent "aucune collecte de données réelles" était erronée pour les données négatives — corrigé ici.**
+
+**Licence TTS (Piper) — correction Codex HAUTE :**
+
+Le rapport précédent indiquait "Piper TTS (licence MIT)". Cette affirmation est **partiellement obsolète** :
+
+- `rhasspy/piper` (version originale, MIT) : **gelé**. README redirige vers le nouveau dépôt.
+- `OHF-Voice/piper1-gpl` (développement actif, Open Home Foundation) : **GNU GPL v3**.
+
+Le snapshot `2026-07-31-piper-gpl-migration.html` archive les deux dépôts et les licences (MIT original, GPL v3 nouveau).
+
+**Conséquence pour la route "poids propres" :** Si Piper est utilisé uniquement comme outil de **génération de données hors-ligne** (étape de build, pas lié au runtime Android), les poids ONNX produits ne sont probablement pas des œuvres dérivées de Piper — mais cela n'a pas été validé juridiquement. Alternative : utiliser VITS (MIT), espeak-ng (GPL v3 aussi, même problème), ou Coqui TTS (MPL 2.0). Statut TTS pour données synthétiques permissives : **inconnu** jusqu'à vérification.
+
+**Propriété des poids entraînés — correction Codex HAUTE :**
+
+- Le code d'entraînement openWakeWord est Apache-2.0 : aucune contrainte sur les outputs.
+- Les poids sont libres **si** les datasets négatifs utilisés ont des licences permissives.
+- Avec Common Voice uniquement en négatif : poids propriétaires vendables. ✓
+- Avec ACAV100M (licence académique imprécise) : **inconnu**.
+- Statut : **conditionnel** — dépend du choix de datasets négatifs.
+
+### Incohérence dans le modèle hey_jarvis — correction Codex MOYENNE
+
+Le snapshot `2026-07-31-openwakeword-hey-jarvis-model.html` (ligne 54) liste comme phrase d'entraînement positive :
+
+> *"The following phrases were included in the training data : 1) "hey mycroft""*
+
+**Incohérence signalée :** Le modèle s'appelle `hey_jarvis` mais "hey mycroft" apparaît dans les données positives, sans "hey jarvis" listé explicitement dans cette section. Interprétations possibles :
+- Erreur de copier-coller dans la documentation (le modèle est réellement entraîné sur "hey jarvis" — confirmé par le titre et les ~200 000 clips mentionnés ailleurs dans la même page).
+- La liste des phrases positives est incomplète (seule une variante alternative est listée).
+
+La fiche mentionne bien "hey jarvis" dans l'intro et les données de test, donc le modèle détecte bien "hey jarvis". Mais la documentation est imprécise sur l'ensemble exact des phrases positives. **L'upstream Github est la source canonique** (`dscripka/openWakeWord/blob/main/docs/models/hey_jarvis.md`) — une issue ou PR de clarification serait utile avant d'utiliser ce modèle en production.
 
 ### Estimations
 
-| Paramètre | Estimation | Base |
-|---|---|---|
-| **GPU-heures** | ~2–4 h (GPU T4 classe Colab) | README : "basic model <1h" ; production (~100k clips, 50k steps) : 2–4h estimées |
-| **Jours-homme** | ~2 j | 0,5 j install/setup + 0,5 j configuration YAML + génération TTS + 0,5 j debug/validation + 0,5 j intégration/tests seuil |
-| **TTS synthétique utilisable** | Oui (seul chemin supporté) | Piper TTS (MIT), 100 % synthétique = méthode officielle |
-| **Licence du code d'entraînement** | Apache-2.0 | LICENSE du dépôt |
-| **Propriété des poids entraînés** | Vous (si données négatives permissives) | Apache-2.0 n'impose rien sur les outputs ; caveat : si ACAV100M négatif utilisé, vérifier termes du dataset |
+| Paramètre | Estimation | Base | Incertitudes |
+|---|---|---|---|
+| **GPU-heures** | ~4 h (T4 Colab) | README : "basic model <1h" ; production avec 50k steps : 2–4h | Borne haute prudente |
+| **Jours-homme** | ~2 j (minimum) | 0,5 j setup + 0,5 j config + 0,5 j debug + 0,5 j intégration | Ne compte pas vérification des licences datasets négatifs |
+| **TTS synthétique** | **inconnu** | Piper GPL v3 (actif), MIT (gelé) ; alternatives à évaluer | Voir section ci-dessus |
+| **Licence code entraînement** | Apache-2.0 | LICENSE du dépôt openWakeWord | Confirmé |
+| **Propriété des poids** | **conditionnel** | Dépend du choix de datasets négatifs | Cf. Common Voice CC BY 4.0 |
 
 **Valeurs retenues pour les champs de vérification :**  
 `poids_propres_gpu_h=4` (borne haute prudente, T4 Colab)  
-`poids_propres_effort_j=2` (arrondi à la journée entière)
+`poids_propres_effort_j=2` (arrondi bas ; ne couvre pas la due diligence datasets)
 
 ---
 
@@ -97,15 +165,18 @@ Les **poids pré-entraînés fournis** (dont `hey_jarvis`) sont sous CC BY-NC-SA
 
 **Signification concrète si le gate P0 échoue :**
 
-Si openWakeWord ne passe pas le gate P0 (détection insuffisante, batterie rédhibitoire, ou trop de faux positifs), la route de repli viable est **entraîner nos propres poids** avec le pipeline openWakeWord + Piper TTS, et non Porcupine.
+Si openWakeWord ne passe pas le gate P0, la route de repli viable est **entraîner nos propres poids** avec le pipeline openWakeWord + un TTS permissif (Common Voice pour les négatifs), et non Porcupine.
 
-Pourquoi Porcupine ne peut pas être le repli durable :
-1. **Pas de droit personnel durable** : Picovoice indique explicitement "no dedicated free or paid plans for personal or non-commercial use". Le Free Trial est une offre unique non renouvelable.
-2. **Prix commercial inconnu** : tarification B2B non publiée, nécessite une négociation avec l'équipe commerciale.
-3. **Télémétrie** : usage data remontée aux serveurs Picovoice (ToS §5) — incompatible avec une architecture "zéro dépendance tiers commercial".
-4. **Keyword** : Porcupine intègre "Jarvis" mais pas "Hey Jarvis" — un modèle custom via Console Picovoice serait nécessaire, uniquement accessible via compte et AccessKey.
+**Pourquoi Porcupine ne peut pas être le repli durable :**
+1. **Pas de droit personnel durable** : "no dedicated free or paid plans for personal or non-commercial use" (FAQ archivée). Free Trial : offre unique non renouvelable.
+2. **Prix commercial inconnu** : B2B non-publié, page `/pricing/` redirige vers `/contact` (snapshot archivé).
+3. **Télémétrie** : usage data remontée aux serveurs Picovoice (ToS §5).
+4. **"Hey Jarvis" absent** : les keywords intégrés sont `porcupine`, `bumblebee` et quelques autres — "Jarvis" (sans "Hey") existe mais "Hey Jarvis" nécessiterait un `.ppn` custom via Console (compte + AccessKey requis).
 
-La route « poids propres » est **décidée par l'Owner** (message vocal 2026-07-31, §8 de l'architecture) comme route commerciale à terme. En cas d'échec P0 sur openWakeWord pré-entraîné, la même route s'applique au stade v1 : entraîner un modèle "hey jarvis" sur données synthétiques Piper (~2 j-h, ~4 GPU-h Colab) → poids propriétaires, licence libre.
+**Conditions pour que `verdict_repli=poids_propres` soit viable en commercial :**
+- Choisir des datasets négatifs à licence permissive (ex : Common Voice CC BY 4.0, FSD50k en CC0 uniquement).
+- Clarifier le statut du TTS pour la génération de données (Piper MIT gelé vs. GPL v3 actif — ou alternative VITS/Coqui).
+- Ces points représentent ~0,5–1 j supplémentaire de due diligence non inclus dans l'estimation de 2 j.
 
 **Décision Owner requise uniquement si** : ni openWakeWord pré-entraîné ni le modèle ré-entraîné ne passent le gate (scénario « nogo »). Dans ce cas, les alternatives sont : Porcupine avec acceptation d'un essai temporaire + budget licence commerciale ultérieure, ou abandon de la fonctionnalité wake-word en v1.
 
@@ -113,13 +184,14 @@ La route « poids propres » est **décidée par l'Owner** (message vocal 2026-0
 
 ## 4. Instantanés des pages consultées
 
-Les fichiers sources sont sauvegardés sous `docs/sources/` :
+Les fichiers sources sont sauvegardés sous `docs/sources/` (7 fichiers, tous > 4 Ko) :
 
 | Fichier | Source | Taille |
 |---|---|---|
-| `2026-07-31-picovoice-terms-of-use.html` | https://picovoice.ai/docs/terms-of-use/ | ~17 Ko |
-| `2026-07-31-picovoice-faq-general.html` | https://picovoice.ai/docs/faq/general/ | ~21 Ko |
+| `2026-07-31-picovoice-faq-general.html` | https://picovoice.ai/docs/faq/general/ | ~20 Ko |
+| `2026-07-31-picovoice-terms-of-use.html` | https://picovoice.ai/docs/terms-of-use/ | ~16 Ko |
+| `2026-07-31-picovoice-pricing-redirect.html` | https://picovoice.ai/pricing/ (+ /contact) | ~4 Ko |
+| `2026-07-31-porcupine-android-quickstart.html` | https://picovoice.ai/docs/quick-start/porcupine-android/ | ~5 Ko |
 | `2026-07-31-openwakeword-readme.html` | https://github.com/dscripka/openWakeWord | ~27 Ko |
 | `2026-07-31-openwakeword-hey-jarvis-model.html` | https://github.com/dscripka/openWakeWord/blob/main/docs/models/hey_jarvis.md | ~6 Ko |
-
-Note : la page `https://picovoice.ai/pricing/` redirige vers `/contact` (protection Cloudflare) — aucun tarif public visible. Ce comportement est lui-même une confirmation que la tarification est B2B non-publiée.
+| `2026-07-31-piper-gpl-migration.html` | https://github.com/rhasspy/piper + https://github.com/OHF-Voice/piper1-gpl | ~7 Ko |

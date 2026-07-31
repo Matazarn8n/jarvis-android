@@ -1,0 +1,145 @@
+<!-- SOURCE: https://github.com/rhasspy/piper + https://github.com/OHF-Voice/piper1-gpl | FETCHED: 2026-07-31 -->
+<!-- CONTEXT: Piper TTS originally MIT; development migrated to new GPL v3 repo in Open Home Foundation -->
+
+=== A. OLD REPO: https://github.com/rhasspy/piper — README redirects to new repo ===
+(Raw README content from rhasspy/piper master branch:)
+"Development has moved: https://github.com/OHF-Voice/piper1-gpl"
+
+=== B. OLD REPO LICENSE (rhasspy/piper, master): MIT ===
+MIT License
+
+Copyright (c) 2022 Michael Hansen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+=== C. NEW REPO: https://github.com/OHF-Voice/piper1-gpl — Active development ===
+README CONTENT:
+![Piper](etc/logo.png)
+
+A fast and local neural text-to-speech engine that embeds [espeak-ng][] for phonemization.
+
+Install with:
+
+``` sh
+pip install piper-tts
+```
+
+* 🎧 [Samples][samples]
+* 💡 [Demo][demo]
+* 🗣️ [Voices][voices]
+* 🖥️ [Command-line interface][cli]
+* 🌐 [Web server][api-http]
+* 🐍 [Python API][api-python]
+* 🔧 [C/C++ API][libpiper]
+* 🏋️ [Training new voices][training]
+* 🛠️ [Building manually][building]
+
+---
+
+## Looking for Maintainers
+
+The Open Home Foundation is looking for maintainers for Piper! If you're interested, please send a message to voice@openhomefoundation.org
+
+---
+
+People/projects using Piper:
+
+* [Home Assistant](https://github.com/home-assistant/addons/blob/master/piper/README.md)
+* [NVDA - NonVisual Desktop Access](https://www.nvaccess.org/post/in-process-8th-may-2023/#voices)
+* [Image Captioning for the Visually Impaired and Blind: A Recipe for Low-Resource Languages](https://www.techrxiv.org/articles/preprint/Image_Captioning_for_the_Visually_Impaired_and_Blind_A_Recipe_for_Low-Resource_Languages/22133894)
+* [Video tutorial by Thorsten Müller](https://youtu.be/rjq5eZoWWSo)
+* [Open Voice Operating System](https://github.com/OpenVoiceOS/ovos-tts-plugin-piper)
+* [JetsonGPT](https://github.com/shahizat/jetsonGPT)
+* [LocalAI](https://github.com/go-skynet/LocalAI)
+* [Lernstick EDU / EXAM: reading clipboard content aloud with language detection](https://lernstick.ch/)
+* [Natural Speech - A plugin for Runelite, an OSRS Client](https://github.com/phyce/rl-natural-speech)
+* [mintPiper](https://github.com/evuraan/mintPiper)
+* [Vim-Piper](https://github.com/wolandark/vim-piper)
+* [POTaTOS](https://www.youtube.com/watch?v=Dz95q6XYjwY)
+* [Narration Studio](https://github.com/phyce/Narration-Studio)
+* [Basic TTS](https://basictts.com/) - Simple online text-to-speech converter.
+
+[![A library from the Open Home Foundation](https://www.openhomefoundation.org/badges/ohf-library.png)](https://www.openhomefoundation.org/)
+
+<!-- Links -->
+[espeak-ng]: https://github.com/espeak-ng/espeak-ng
+[cli]: https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/CLI.md
+[api-http]: https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/API_HTTP.md
+[api-python]: https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/API_PYTHON.md
+[training]: https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/TRAINING.md
+[building]: https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/BUILDING.md
+[voices]: https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/VOICES.md
+[samples]: https://rhasspy.github.io/piper-samples
+[demo]: https://rhasspy.github.io/piper-samples/demo.html
+[libpiper]: https://github.com/OHF-Voice/piper1-gpl/tree/main/libpiper
+
+
+=== D. NEW REPO LICENSE (OHF-Voice/piper1-gpl, main/COPYING): GNU GPL v3 ===
+(first 2000 chars)
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+                            Preamble
+
+  The GNU General Public License is a free, copyleft license for
+software and other kinds of works.
+
+  The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+the GNU General Public License is intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users.  We, the Free Software Foundation, use the
+GNU General Public License for most of our software; it applies also to
+any other work released this way by its authors.  You can apply it to
+your programs, too.
+
+  When we speak of free software, we are referring to freedom, not
+price.  Our General Public Licenses are designed to make sure that you
+have the freedom to distribute copies of free software (and charge for
+them if you wish), that you receive source code or can get it if you
+want it, that you can change the software or use pieces of it in new
+free programs, and that you know you can do these things.
+
+  To protect your rights, we need to prevent others from denying you
+these rights or asking you to surrender the rights.  Therefore, you have
+certain responsibilities if you distribute copies of the software, or if
+you modify it: responsibilities to respect the freedom of others.
+
+  For example, if you distribute copies of such a program, whether
+gratis or for a fee, you must pass on to the recipients the same
+freedoms that you received.  You must make sure that they, too, receive
+or can get the source code.  And you must show them these terms so they
+know their rights.
+
+  Developers that use the GNU GPL protect your rights with two steps:
+
+=== SUMMARY ===
+- rhasspy/piper (original): MIT License, Copyright (c) 2022 Michael Hansen. Frozen/archived.
+- OHF-Voice/piper1-gpl (active): GNU General Public License v3 (GPL-3.0). Maintained by Open Home Foundation.
+- IMPLICATION: New Piper builds are GPL v3. Using the Piper TTS runtime in a closed-source app requires
+  either: (a) using only the old MIT version (frozen, no updates), or (b) ensuring app is open-source GPL,
+  or (c) using an alternative TTS (Coqui TTS, VITS, etc.).
+- openWakeWord used Piper for synthetic data GENERATION only (not linking the library into app code).
+  If data generation is done offline as a build step, the resulting .onnx weights are NOT derivative works
+  of Piper and are NOT subject to GPL. But this must be verified with a legal review.
