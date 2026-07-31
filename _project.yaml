@@ -1,0 +1,17 @@
+id: jarvis-android
+name: Jarvis Android
+type: app
+status: active
+repo: /home/nuveo/projects/jarvis-android
+workflows: []
+docs:
+  - README.md
+  - /home/nuveo/hermes-os/docs/architecture-jarvis-android-2026-08.md
+  - /home/nuveo/hermes-os/docs/superpowers/plans/2026-07-31-jarvis-android.md
+outputs:
+  - app/build/outputs/apk/debug/app-debug.apk
+# Pas de bloc `runbooks:` ici : le runbook P0/P1 vit sous
+# /home/nuveo/hermes-os/runbooks/, et la découverte borne un plan au dossier du
+# projet qui le déclare (is_relative_to). Il est donc déclaré dans le manifeste
+# de hermes-os. Déclarer = ARMER (timer plan-doctor toutes les 15 min).
+last_reviewed: 2026-07-31
