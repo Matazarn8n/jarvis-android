@@ -49,6 +49,17 @@ Pour remplacer le modèle : déposer un nouveau `.onnx` dans ce dossier et mettr
 dans le code ne connaît le modèle. Licence des poids : CC BY-NC-SA 4.0 (voir
 `NOTICE.md` et `docs/licences-wake.md`).
 
+## Dépendance ONNX Runtime
+
+L'AAR `com.microsoft.onnxruntime:onnxruntime-android:1.19.2` pèse **27,7 Mo**
+(mesuré sur Maven Central le 2026-07-31). L'architecture doc §3 indiquait
+« estimation 12–15 Mo » ; la valeur réelle est supérieure. À prendre en compte
+pour le budget de taille APK (objectif P0 : aucun constraint explicite).
+
+Pour les tests JVM (parité Python ↔ Kotlin) on utilise le JAR desktop
+`com.microsoft.onnxruntime:onnxruntime:1.19.2` — même API `ai.onnxruntime`,
+aucun contexte Android nécessaire.
+
 ## État
 
 - **P0** (spike détection + licences) : en cours — tickets JA-T2 … JA-T7.

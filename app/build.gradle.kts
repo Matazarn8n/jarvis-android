@@ -34,4 +34,8 @@ android {
 
 dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
+    // ONNX Runtime — AAR réel mesuré : 27.7 Mo (estimation architecture : 12–15 Mo)
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.19.2")
+    testImplementation("com.microsoft.onnxruntime:onnxruntime:1.19.2")
+    testImplementation("junit:junit:4.13.2")
 }
