@@ -87,6 +87,22 @@ class SpikeWakeService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(NOTIF_ID, buildNotification("Armé — en écoute…"))
+
+        // Créer le journal dès le démarrage du service (objection Codex HAUTE) :
+        // une session valide à zéro détection doit pouvoir être lue par `run-as … cat`.
+        // Échec explicite : le service ne reste pas « armé » sans journal accessible.
+        val journalFile = File(journalPath)
+        if (!journalFile.exists()) {
+            try {
+                journalFile.createNewFile()
+                Log.i(TAG, "Journal créé au démarrage : $journalPath")
+            } catch (e: Exception) {
+                Log.e(TAG, "Impossible de créer le journal : $e")
+                stopSelfWithError("Erreur journal — service arrêté")
+                return START_NOT_STICKY
+            }
+        }
+
         startCapture()
         return START_STICKY
     }
@@ -105,12 +121,24 @@ class SpikeWakeService : Service() {
 
         audioThread = Thread {
             runCatching { captureLoop() }
-                .onFailure { Log.e(TAG, "captureLoop crashed: ${it.message}", it) }
+                .onFailure { e ->
+                    Log.e(TAG, "captureLoop crashed: ${e.message}", e)
+                    // Objection Codex MOYENNE/107 : une panne ne laisse pas le FGS
+                    // vivant avec running=true mais sans capture réelle.
+                    stopSelfWithError("Erreur capture — service arrêté")
+                }
         }.apply {
             isDaemon = true
             name = "SpikeCapture"
             start()
         }
+    }
+
+    /** Arrête proprement le service en cas d'erreur et reflète l'état dans la notification. */
+    private fun stopSelfWithError(msg: String) {
+        running.set(false)
+        updateNotification(msg)
+        stopSelf()
     }
 
     private fun stopCapture() {
@@ -163,6 +191,8 @@ class SpikeWakeService : Service() {
         if (recorder.state != AudioRecord.STATE_INITIALIZED) {
             Log.e(TAG, "AudioRecord non initialisé — RECORD_AUDIO accordé ?")
             pipeline.close()
+            // Objection Codex MOYENNE/107 : on ne laisse pas le FGS vivant sans capture.
+            stopSelfWithError("Erreur micro — RECORD_AUDIO manquant ?")
             return
         }
         recorder.startRecording()
@@ -202,14 +232,21 @@ class SpikeWakeService : Service() {
                         val count      = detectCount.incrementAndGet()
                         val bootMs     = SystemClock.elapsedRealtime()
                         val timestamp  = isoFmt.format(Date(now))
-                        val line       = "$timestamp detect score=%.3f rms=%.1f since_boot_ms=$bootMs"
-                            .format(score, rms)
+                        // Objection Codex MOYENNE/205 : Locale.US garantit un point décimal
+                        // stable quelle que soit la locale du téléphone (fr → virgule sinon).
+                        val line = String.format(
+                            Locale.US,
+                            "%s detect score=%.3f rms=%.1f since_boot_ms=%d",
+                            timestamp, score, rms, bootMs
+                        )
 
                         Log.i(TAG, line)
                         runCatching { journalFile.appendText("$line\n") }
                             .onFailure { Log.e(TAG, "Écriture journal échouée: $it") }
 
-                        updateNotification("Armé | Détections: $count | score=%.3f".format(score))
+                        updateNotification(
+                            String.format(Locale.US, "Armé | Détections: %d | score=%.3f", count, score)
+                        )
                     }
 
                     // ── Broadcast throttlé vers l'activité ───────────────────

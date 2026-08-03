@@ -5,3 +5,9 @@ local.properties
 *.keystore
 .idea/
 *.iml
+
+# Mesures brutes (logcat, journal APK, résumés) — données potentiellement personnelles
+# (serial ADB, timestamps de session) ; jamais dans Git.
+# Le répertoire lui-même est suivi via .gitkeep.
+docs/mesures-brutes/**
+!docs/mesures-brutes/.gitkeep

@@ -80,12 +80,13 @@ LAST_TS=$(grep  "detect score=" "${SESSION_DIR}/spike-detections.log" 2>/dev/nul
 
 cat > "${SESSION_DIR}/summary.txt" <<EOF
 session=${SESSION}
-device=${DEVICE}
 detect_count_journal=${DETECT_COUNT}
 detect_count_logcat=${LOGCAT_COUNT}
 first_detection=${FIRST_TS}
 last_detection=${LAST_TS}
 EOF
+# Note : le serial ADB (${DEVICE}) n'est PAS exporté dans summary.txt
+# (identifiant potentiellement personnel, inutile pour le verdict P0).
 
 echo "── Résumé :"
 cat "${SESSION_DIR}/summary.txt"
