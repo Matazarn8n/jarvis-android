@@ -173,7 +173,12 @@ class SpikeWakeService : Service() {
 
         // ── Boucle de capture ────────────────────────────────────────────────
         val samples       = ShortArray(chunkSize)
-        var lastDetectMs  = Long.MIN_VALUE
+        // null = aucune détection encore, donc JAMAIS dans la fenêtre réfractaire.
+        // Même choix que WakeGate, et pour la même raison : avec Long.MIN_VALUE,
+        // `now - lastDetectMs` vaut ~9,22e18 > Long.MAX_VALUE et DÉBORDE en négatif,
+        // si bien que la condition ci-dessous restait fausse à jamais — aucune
+        // détection n'était journalisée ni comptée (audit Codex du 2026-08-03).
+        var lastDetectMs: Long? = null
         var lastBcastMs   = 0L
 
         try {
@@ -191,7 +196,8 @@ class SpikeWakeService : Service() {
 
                     // ── Détection ────────────────────────────────────────────
                     val now = System.currentTimeMillis()
-                    if (score >= threshold && (now - lastDetectMs) >= refractoryMs) {
+                    val dansRefractaire = lastDetectMs?.let { (now - it) < refractoryMs } ?: false
+                    if (score >= threshold && !dansRefractaire) {
                         lastDetectMs = now
                         val count      = detectCount.incrementAndGet()
                         val bootMs     = SystemClock.elapsedRealtime()

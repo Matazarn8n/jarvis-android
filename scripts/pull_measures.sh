@@ -46,13 +46,19 @@ mkdir -p "${SESSION_DIR}"
 
 # ── 1. Pull du fichier journal ────────────────────────────────────────────────
 echo "── Pull journal ${JOURNAL_REMOTE} …"
-if adb -s "${DEVICE}" shell "[ -f '${JOURNAL_REMOTE}' ]" 2>/dev/null; then
-    adb -s "${DEVICE}" pull "${JOURNAL_REMOTE}" "${SESSION_DIR}/spike-detections.log"
-    echo "   → ${SESSION_DIR}/spike-detections.log"
-else
-    echo "   ATTENTION : journal absent sur l'appareil (service démarré au moins une fois ?)."
-    touch "${SESSION_DIR}/spike-detections.log"
+# `adb pull` ne peut PAS lire /data/data/<pkg>/ sur un appareil non root : il
+# échouait, le `else` créait un journal vide, et le script finissait à 0 sans
+# aucune collecte — un faux positif d'école (audit Codex du 2026-08-03). On passe
+# donc par `run-as`, qui fonctionne sur un APK debug, et une lecture qui échoue
+# FAIT ÉCHOUER le script au lieu de le verdir.
+if ! adb -s "${DEVICE}" exec-out run-as "${APP_ID}" cat "files/$(basename "${JOURNAL_REMOTE}")" \
+        > "${SESSION_DIR}/spike-detections.log" 2>/dev/null; then
+    rm -f "${SESSION_DIR}/spike-detections.log"
+    echo "   ERREUR : journal illisible via run-as ${APP_ID}." >&2
+    echo "   Causes : APK non debuggable, service jamais démarré, ou mauvais package." >&2
+    exit 1
 fi
+echo "   → ${SESSION_DIR}/spike-detections.log"
 
 # ── 2. Dump logcat filtré JARVISWAKE ──────────────────────────────────────────
 echo "── Dump logcat -d -s ${LOGCAT_TAG} …"
@@ -62,8 +68,12 @@ echo "   → ${SESSION_DIR}/logcat-jarviswake.txt"
 
 # ── 3. Agrégation en compteurs bruts ─────────────────────────────────────────
 echo "── Agrégation des compteurs …"
-DETECT_COUNT=$(grep -c "detect score=" "${SESSION_DIR}/spike-detections.log" 2>/dev/null || echo 0)
-LOGCAT_COUNT=$(grep -c "detect score=" "${SESSION_DIR}/logcat-jarviswake.txt" 2>/dev/null || echo 0)
+# `grep -c` ÉCRIT déjà "0" quand il ne trouve rien, puis sort en 1 : le
+# `|| echo 0` d'origine ajoutait un SECOND "0", donc une valeur sur deux lignes
+# qui corrompait summary.txt (audit Codex du 2026-08-03). `|| true` neutralise
+# le code de sortie sans toucher à la sortie.
+DETECT_COUNT=$(grep -c "detect score=" "${SESSION_DIR}/spike-detections.log" 2>/dev/null || true)
+LOGCAT_COUNT=$(grep -c "detect score=" "${SESSION_DIR}/logcat-jarviswake.txt" 2>/dev/null || true)
 
 FIRST_TS=$(grep "detect score=" "${SESSION_DIR}/spike-detections.log" 2>/dev/null | head -1 | awk '{print $1}' || echo "—")
 LAST_TS=$(grep  "detect score=" "${SESSION_DIR}/spike-detections.log" 2>/dev/null | tail -1 | awk '{print $1}' || echo "—")
