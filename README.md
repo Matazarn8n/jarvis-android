@@ -53,9 +53,9 @@ L'architecture porte l'hypothèse « très probablement un Galaxy A16 » — à
 remplacer ici par les valeurs réelles, une ligne par propriété :
 
 ```
-ro.product.model=
-ro.build.version.release=
-ro.build.version.sdk=
+ro.product.model=SM-A165F
+ro.build.version.release=16
+ro.build.version.sdk=36
 ```
 
 ## Assets wake-word
