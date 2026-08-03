@@ -75,17 +75,33 @@ class SpikeActivity : AppCompatActivity() {
 
         btnToggle.setOnClickListener { onToggle() }
 
-        // Auto-armer au premier démarrage (savedInstanceState == null) :
-        // si les permissions sont déjà accordées, le service démarre immédiatement
-        // (check P0 via `am start`, ou relancement après accord préalable).
-        // Si non accordées, la demande est lancée ; le service démarre dès l'accord
-        // (voir onRequestPermissionsResult).
-        if (savedInstanceState == null && !serviceRunning) {
+        // Auto-armer uniquement si le service n'est pas déjà actif.
+        // On NE garde PAS la condition `savedInstanceState == null` (réserve audit
+        // Codex #3 / SpikeActivity.kt:83) : après une rotation d'écran l'activité
+        // est recréée, savedInstanceState != null, le bloc était ignoré, et le bouton
+        // affichait "Armer" même si le service tournait.  L'état est maintenant
+        // dérivé depuis SpikeWakeService.isRunning() dans onResume().
+        if (!SpikeWakeService.isRunning()) {
             if (hasAllPermissions()) {
                 armService()
             } else {
                 ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQ_PERMISSIONS)
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Réserve audit Codex #3 — synchroniser l'état UI depuis l'état RÉEL du service.
+        // Appelé à chaque recréation d'activité (rotation, retour en premier plan) :
+        // l'Owner mesure écran éteint, la rotation arrive, le bouton doit refléter
+        // ce que le service fait réellement, pas ce que le cycle de vie a vu.
+        val running = SpikeWakeService.isRunning()
+        serviceRunning = running
+        btnToggle.text = if (running) "Désarmer" else "Armer"
+        if (running) {
+            tvJournal.text = "${filesDir.absolutePath}/spike-detections.log"
+                .let { "Journal : $it" }
         }
     }
 

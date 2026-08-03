@@ -36,6 +36,22 @@
             android:exported="false"
             android:foregroundServiceType="microphone" />
 
+        <!--
+          InjectWakeReceiver — point d'injection PCM debug (JA-T5).
+          android:exported="true" requis : sans cela `adb shell am broadcast` ne peut
+          pas atteindre le composant depuis l'extérieur du processus.
+          Sécurité : le récepteur se neutralise hors BuildConfig.DEBUG — retour
+          immédiat si la build n'est pas debug, donc aucune fabrication de détection
+          en production.  L'APK spike est jetable : c'est assumé.
+        -->
+        <receiver
+            android:name=".InjectWakeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.agenterie.jarvis.spike.INJECT_WAKE" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>
