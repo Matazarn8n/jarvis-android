@@ -15,6 +15,7 @@ import android.os.IBinder
 import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.agenterie.jarvis.wake.WakeGate
 import com.agenterie.jarvis.wake.WakePipeline
 import java.io.File
 import java.text.SimpleDateFormat
@@ -161,15 +162,13 @@ class SpikeWakeService : Service() {
         )
 
         // ── Lecture de la config wake.json (seuil + réfractaire) ────────────
-        val (threshold, refractoryMs) = runCatching {
-            val json = assets.open("wake/wake.json").bufferedReader().readText()
-            val th  = Regex(""""threshold"\s*:\s*([\d.]+)""").find(json)!!.groupValues[1].toFloat()
-            val rfr = Regex(""""refractory_ms"\s*:\s*(\d+)""").find(json)!!.groupValues[1].toLong()
-            Pair(th, rfr)
-        }.getOrElse {
-            Log.w(TAG, "wake.json illisible, valeurs par défaut appliquées: $it")
-            Pair(0.5f, DEFAULT_REFRACTORY_MS)
-        }
+        // Objection Codex MOYENNE — WakeGate.fromConfig lève une IllegalArgumentException
+        // si threshold ou refractory_ms est absent ou invalide : plus de fallback silencieux
+        // sur 0.5 qui rendrait les mesures P0 intraçables à la configuration prévue.
+        // L'exception se propage jusqu'au runCatching de startCapture → stopSelfWithError.
+        val gate = WakeGate.fromConfig(assets.open("wake/wake.json"), pipeline)
+        val threshold    = gate.threshold
+        val refractoryMs = gate.refractoryMs
 
         Log.i(TAG, "SpikeWakeService démarré — threshold=$threshold refractoryMs=$refractoryMs")
 
@@ -215,6 +214,13 @@ class SpikeWakeService : Service() {
             pipeline.use {
                 while (running.get()) {
                     val read = recorder.read(samples, 0, chunkSize)
+                    // Objection Codex HAUTE — les valeurs négatives sont des codes d'erreur
+                    // AudioRecord (ERROR=-1, ERROR_INVALID_OPERATION=-3, etc.), pas des lectures
+                    // courtes. Les traiter comme `continue` provoque une boucle CPU sans audio.
+                    // On lève une exception pour que startCapture.runCatching arrête le service.
+                    if (read < 0) throw RuntimeException(
+                        "AudioRecord.read() erreur=$read — micro perdu ou permission révoquée ?"
+                    )
                     if (read < chunkSize) continue
 
                     // ── Score ────────────────────────────────────────────────
@@ -229,20 +235,27 @@ class SpikeWakeService : Service() {
                     val dansRefractaire = lastDetectMs?.let { (now - it) < refractoryMs } ?: false
                     if (score >= threshold && !dansRefractaire) {
                         lastDetectMs = now
-                        val count      = detectCount.incrementAndGet()
                         val bootMs     = SystemClock.elapsedRealtime()
                         val timestamp  = isoFmt.format(Date(now))
-                        // Objection Codex MOYENNE/205 : Locale.US garantit un point décimal
-                        // stable quelle que soit la locale du téléphone (fr → virgule sinon).
+                        // Locale.US : point décimal stable quelle que soit la locale du téléphone.
                         val line = String.format(
                             Locale.US,
                             "%s detect score=%.3f rms=%.1f since_boot_ms=%d",
                             timestamp, score, rms, bootMs
                         )
 
+                        // Objection Codex HAUTE — écriture en journal AVANT le comptage.
+                        // Tout échec d'écriture est fatal : les mesures P0 seraient
+                        // silencieusement incomplètes (compteur > lignes réelles).
+                        // L'exception se propage à startCapture.runCatching → stopSelfWithError.
+                        try {
+                            journalFile.appendText("$line\n")
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Écriture journal échouée — service arrêté : $e")
+                            throw e
+                        }
                         Log.i(TAG, line)
-                        runCatching { journalFile.appendText("$line\n") }
-                            .onFailure { Log.e(TAG, "Écriture journal échouée: $it") }
+                        val count = detectCount.incrementAndGet()
 
                         updateNotification(
                             String.format(Locale.US, "Armé | Détections: %d | score=%.3f", count, score)
