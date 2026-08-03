@@ -20,6 +20,21 @@ JOURNAL_REMOTE="/data/data/${APP_ID}/files/spike-detections.log"
 LOGCAT_TAG="JARVISWAKE"
 OUT_DIR="docs/mesures-brutes"
 SESSION="${1:-$(date -u +'%Y%m%dT%H%M%SZ')}"
+
+# ── Réserve audit Codex #1 (pull_measures.sh:22) ─────────────────────────────
+# Valider le label SESSION : refuser tout ce qui n'est pas [A-Za-z0-9._-]+
+# et refuser les valeurs . et .. qui traversent les répertoires.
+# Un label non validé peut écrire hors de docs/mesures-brutes/ et corrompre
+# le protocole P0 ou écraser des fichiers arbitraires.
+if [[ -z "${SESSION}" ]] || \
+   [[ ! "${SESSION}" =~ ^[A-Za-z0-9._-]+$ ]] || \
+   [[ "${SESSION}" == "." ]] || \
+   [[ "${SESSION}" == ".." ]]; then
+    echo "ERREUR : label de session rejeté : '${SESSION}'" >&2
+    echo "  Seuls les caractères A-Z a-z 0-9 . _ - sont autorisés." >&2
+    echo "  Les labels '.' et '..' sont interdits." >&2
+    exit 1
+fi
 SESSION_DIR="${OUT_DIR}/${SESSION}"
 
 # ── Résolution de adb ─────────────────────────────────────────────────────────
@@ -75,8 +90,17 @@ echo "── Agrégation des compteurs …"
 DETECT_COUNT=$(grep -c "detect score=" "${SESSION_DIR}/spike-detections.log" 2>/dev/null || true)
 LOGCAT_COUNT=$(grep -c "detect score=" "${SESSION_DIR}/logcat-jarviswake.txt" 2>/dev/null || true)
 
-FIRST_TS=$(grep "detect score=" "${SESSION_DIR}/spike-detections.log" 2>/dev/null | head -1 | awk '{print $1}' || echo "—")
-LAST_TS=$(grep  "detect score=" "${SESSION_DIR}/spike-detections.log" 2>/dev/null | tail -1 | awk '{print $1}' || echo "—")
+# ── Réserve audit Codex #2 (pull_measures.sh:78) ─────────────────────────────
+# `grep … | head -1` sous `set -euo pipefail` : head ferme le tube après la
+# première ligne, grep meurt en SIGPIPE (code 141), la commande composée échoue,
+# `|| echo "—"` substitue "—" même quand des détections existent.
+# Correction : awk lit le fichier SANS tube, n'ouvre pas de SIGPIPE.
+FIRST_TS=$(awk '/detect score=/{print $1; exit}' \
+               "${SESSION_DIR}/spike-detections.log" 2>/dev/null)
+FIRST_TS="${FIRST_TS:-—}"
+LAST_TS=$(awk '/detect score=/{ts=$1} END{print ts}' \
+              "${SESSION_DIR}/spike-detections.log" 2>/dev/null)
+LAST_TS="${LAST_TS:-—}"
 
 cat > "${SESSION_DIR}/summary.txt" <<EOF
 session=${SESSION}
