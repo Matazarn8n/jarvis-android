@@ -74,6 +74,19 @@ class SpikeActivity : AppCompatActivity() {
         tvJournal.text = "Journal : $journalPath"
 
         btnToggle.setOnClickListener { onToggle() }
+
+        // Auto-armer au premier démarrage (savedInstanceState == null) :
+        // si les permissions sont déjà accordées, le service démarre immédiatement
+        // (check P0 via `am start`, ou relancement après accord préalable).
+        // Si non accordées, la demande est lancée ; le service démarre dès l'accord
+        // (voir onRequestPermissionsResult).
+        if (savedInstanceState == null && !serviceRunning) {
+            if (hasAllPermissions()) {
+                armService()
+            } else {
+                ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQ_PERMISSIONS)
+            }
+        }
     }
 
     override fun onStart() {
