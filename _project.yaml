@@ -1,6 +1,6 @@
 id: jarvis-android
 name: Jarvis Android
-type: app
+type: project
 status: active
 repo: /home/nuveo/projects/jarvis-android
 workflows: []
