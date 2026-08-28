@@ -1,7 +1,12 @@
 id: jarvis-android
 name: Jarvis Android
 type: project
-status: active
+# PASSE DE STATUT du 2026-08-28. Mesure : dernier commit 2026-08-04 (il y a 24 j),
+# aucun timer systemd ni ligne de crontab ne vise ce projet. `active` n'etait
+# soutenu par aucune mesure — sur 31 depots reels, 55 manifestes disaient
+# `active` parce que le champ n'avait jamais servi a autre chose qu'a exister.
+# `paused` et non `archive` : rien n'indique un abandon, seulement un arret.
+status: paused
 repo: /home/nuveo/projects/jarvis-android
 workflows: []
 docs:
