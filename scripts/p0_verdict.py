@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """JA-T7 — verdict P0 recalculé depuis docs/p0-mesures.md (stdlib). --demo = auto-contrôle."""
+import math
 import re
 import sys
 from pathlib import Path
@@ -10,7 +11,12 @@ CHAMPS = ["n_essais_1m", "hits_1m", "n_essais_3m", "hits_3m", "fp_hours",
 
 
 def lire(texte):
-    return {m.group(1): m.group(2).strip() for m in re.finditer(r"^([a-z_0-9]+)=(.*)$", texte, re.M)}
+    c = {}
+    for m in re.finditer(r"^([a-z_0-9]+)=(.*)$", texte, re.M):
+        if m.group(1) in c:
+            raise SystemExit(f"champ en double: {m.group(1)}")
+        c[m.group(1)] = m.group(2).strip()
+    return c
 
 
 def calcule(c):
@@ -20,11 +26,14 @@ def calcule(c):
             v[k] = float(c[k])
         except (KeyError, ValueError):
             raise SystemExit(f"protocole incomplet: champ {k} manquant ou vide")
+        if not math.isfinite(v[k]):
+            raise SystemExit(f"valeur non finie: {k}")
     err = [m for m, ok in [
         ("n_essais_1m < 20", v["n_essais_1m"] >= 20), ("n_essais_3m < 20", v["n_essais_3m"] >= 20),
         ("fp_hours < 8", v["fp_hours"] >= 8), ("battery_nights < 2", v["battery_nights"] >= 2),
         ("ratio hors [0,1]", 0 <= v["hits_1m"] <= 1 and 0 <= v["hits_3m"] <= 1),
-        ("latency_p95 <= 0", v["latency_p95"] > 0)] if not ok]
+        ("latency_p95 <= 0", v["latency_p95"] > 0),
+        ("fp_per_day < 0", v["fp_per_day"] >= 0)] if not ok]
     if err:
         raise SystemExit("protocole incomplet: " + ", ".join(err))
     go = (v["hits_1m"] >= .90 and v["hits_3m"] >= .75 and v["fp_per_day"] <= 2
@@ -47,7 +56,18 @@ def demo():
         except SystemExit:
             continue
         raise AssertionError("incomplet accepté")
-    print("ok")
+    for bad in ({**base, "fp_hours": "inf"}, {**base, "fp_per_day": "nan"}, {**base, "fp_per_day": -1}):
+        try:
+            calcule(bad)
+        except SystemExit:
+            continue
+        raise AssertionError("valeur invalide acceptée")
+    try:
+        lire("hits_1m=0.5\nhits_1m=0.9\n")
+    except SystemExit:
+        print("ok")
+        return
+    raise AssertionError("doublon accepté")
 
 
 if __name__ == "__main__":
