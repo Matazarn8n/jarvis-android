@@ -69,12 +69,14 @@ def agrege() -> tuple[dict, list[str]]:
         if lignes:
             champs[f"n_essais_{dist}"] = len(lignes)
             ok = sum(1 for r in lignes if r["succes"].strip().upper() == "O")
-            champs[f"hits_{dist}"] = round(ok / len(lignes), 3)
+            champs[f"hits_{dist}"] = round(ok / len(lignes), 6)
         if len(lignes) < attendu:
             manques.append(f"{dist} : {len(lignes)}/{attendu} essais")
 
     succes = [r for c in CONDITIONS for r in ess[c] if r["succes"].strip().upper() == "O"]
     lat = [float(r["latence_s"]) for r in succes if r["latence_s"].strip()]
+    if any(not (math.isfinite(x) and x > 0) for x in lat):
+        manques.append("latence invalide (nan, inf ou <= 0) dans les essais")
     if len(lat) < len(succes):
         manques.append(f"latence : {len(lat)}/{len(succes)} succès avec latence_s")
     v = p95(lat)
@@ -90,11 +92,12 @@ def agrege() -> tuple[dict, list[str]]:
     if fp:
         heures = sum(float(r["heures"]) for r in fp)
         detections = sum(int(r["detections"]) for r in fp)
-        if not math.isfinite(heures) or heures < 0 or detections < 0:
+        if (not math.isfinite(heures) or heures < 0 or detections < 0
+                or any(float(r["heures"]) < 0 or int(r["detections"]) < 0 for r in fp)):
             manques.append(f"corpus négatif invalide : heures={heures} détections={detections}")
         champs["fp_hours"] = round(heures, 2)
         if heures > 0:
-            champs["fp_per_day"] = round(detections * 24 / heures, 2)
+            champs["fp_per_day"] = round(detections * 24 / heures, 6)
         if heures < 8:
             manques.append(f"corpus négatif : {heures:.1f} h / 8 h")
     else:
@@ -243,6 +246,7 @@ def _check() -> None:
     assert verdict({**complet, "latency_p95": 2.5}, []) == ("GO", []), "plafond dur 2.5 inclus"
     assert verdict({"hits_1m": 1, "hits_3m": 1, "fp_per_day": 0, "battery_delta": 0}, []) == ("", []), "latence absente = sans verdict"
     assert verdict({**complet, "latency_p95": 2.504}, [])[0] == "NOGO", "pas d'arrondi qui franchit le plafond"
+    assert verdict({**complet, "fp_per_day": round(24 * 24 / 11.976, 6)}, [])[0] == "NOGO", "2,004 FP/j != 2,0"
     assert p95([1.0]) == 1.0
     assert p95(list(range(1, 21))) == 19, p95(list(range(1, 21)))
     assert p95([]) is None
