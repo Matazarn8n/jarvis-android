@@ -6,7 +6,7 @@
 > `hits_*` = ratio entre 0 et 1 (18 succès sur 20 → `0.90`).
 > `battery_delta` = %/h supplémentaires par rapport à la nuit témoin sans l'app.
 > `latency_p95` = secondes, fin d'énonciation → signal de détection (logcat JARVISWAKE).
-> `verdict_p0` = `GO` ou `NO-GO`.
+> `verdict_p0` = `GO` ou `NOGO`.
 
 ```
 date_mesure=
