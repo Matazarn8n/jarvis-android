@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import csv
 import sys
+import math
 from datetime import date
 from pathlib import Path
 
@@ -62,6 +63,9 @@ def agrege() -> tuple[dict, list[str]]:
     for dist in ("1m", "3m"):
         lignes = ess[f"{dist}-silence"] + ess[f"{dist}-tv"]
         attendu = 2 * ESSAIS_PAR_CONDITION
+        for c in (f"{dist}-silence", f"{dist}-tv"):
+            if len(ess[c]) < ESSAIS_PAR_CONDITION:
+                manques.append(f"{c} : {len(ess[c])}/{ESSAIS_PAR_CONDITION} essais")
         if lignes:
             champs[f"n_essais_{dist}"] = len(lignes)
             ok = sum(1 for r in lignes if r["succes"].strip().upper() == "O")
@@ -69,16 +73,25 @@ def agrege() -> tuple[dict, list[str]]:
         if len(lignes) < attendu:
             manques.append(f"{dist} : {len(lignes)}/{attendu} essais")
 
-    lat = [float(r["latence_s"]) for c in CONDITIONS for r in ess[c]
-           if r["succes"].strip().upper() == "O" and r["latence_s"].strip()]
+    succes = [r for c in CONDITIONS for r in ess[c] if r["succes"].strip().upper() == "O"]
+    lat = [float(r["latence_s"]) for r in succes if r["latence_s"].strip()]
+    if len(lat) < len(succes):
+        manques.append(f"latence : {len(lat)}/{len(succes)} succès avec latence_s")
     v = p95(lat)
     if v is not None:
-        champs["latency_p95"] = round(v, 2)
+        if not (math.isfinite(v) and v > 0):
+            manques.append(f"latence invalide : {v}")
+        # pas d'arrondi grossier avant verdict : 2,504 s ne doit pas devenir 2,50 (plafond dur)
+        champs["latency_p95"] = round(v, 6)
+    else:
+        manques.append("latence : aucune mesure")
 
     fp = _rows(RAW / "fp.csv")
     if fp:
         heures = sum(float(r["heures"]) for r in fp)
         detections = sum(int(r["detections"]) for r in fp)
+        if not math.isfinite(heures) or heures < 0 or detections < 0:
+            manques.append(f"corpus négatif invalide : heures={heures} détections={detections}")
         champs["fp_hours"] = round(heures, 2)
         if heures > 0:
             champs["fp_per_day"] = round(detections * 24 / heures, 2)
@@ -87,11 +100,16 @@ def agrege() -> tuple[dict, list[str]]:
     else:
         manques.append("corpus négatif : aucune fenêtre")
 
-    bat = {r["nuit"]: r for r in _rows(RAW / "batterie.csv")}
+    bat_rows = _rows(RAW / "batterie.csv")
+    bat = {r["nuit"]: r for r in bat_rows}
+    if len(bat) < len(bat_rows):
+        manques.append("batterie : nuit en double (une mesure serait écrasée)")
     champs["battery_nights"] = len(bat)
     if {"temoin", "armee"} <= set(bat):
-        champs["battery_delta"] = round(
-            float(bat["armee"]["pct_par_h"]) - float(bat["temoin"]["pct_par_h"]), 2)
+        delta = float(bat["armee"]["pct_par_h"]) - float(bat["temoin"]["pct_par_h"])
+        if not math.isfinite(delta):
+            manques.append(f"batterie invalide : {delta}")
+        champs["battery_delta"] = round(delta, 6)
     else:
         manques.append(f"batterie : {sorted(bat) or 'aucune nuit'} (témoin + armée requises)")
 
@@ -99,7 +117,7 @@ def agrege() -> tuple[dict, list[str]]:
 
 
 def verdict(champs: dict, manques: list[str]) -> tuple[str, list[str]]:
-    if manques:
+    if manques or any(k not in champs for k in SEUILS):
         return "", []
     echecs = [
         f"{k} = {champs[k]} (seuil {op} {s})"
@@ -223,6 +241,8 @@ def _check() -> None:
     v, e = verdict({**complet, "latency_p95": 2.6}, [])
     assert v == "NOGO" and "latency_p95" in e[0]
     assert verdict({**complet, "latency_p95": 2.5}, []) == ("GO", []), "plafond dur 2.5 inclus"
+    assert verdict({"hits_1m": 1, "hits_3m": 1, "fp_per_day": 0, "battery_delta": 0}, []) == ("", []), "latence absente = sans verdict"
+    assert verdict({**complet, "latency_p95": 2.504}, [])[0] == "NOGO", "pas d'arrondi qui franchit le plafond"
     assert p95([1.0]) == 1.0
     assert p95(list(range(1, 21))) == 19, p95(list(range(1, 21)))
     assert p95([]) is None
