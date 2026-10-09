@@ -19,6 +19,7 @@ import csv
 import sys
 import math
 from datetime import date
+from decimal import Decimal
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -69,7 +70,7 @@ def agrege() -> tuple[dict, list[str]]:
         if lignes:
             champs[f"n_essais_{dist}"] = len(lignes)
             ok = sum(1 for r in lignes if r["succes"].strip().upper() == "O")
-            champs[f"hits_{dist}"] = round(ok / len(lignes), 6)
+            champs[f"hits_{dist}"] = ok / len(lignes)
         if len(lignes) < attendu:
             manques.append(f"{dist} : {len(lignes)}/{attendu} essais")
 
@@ -84,7 +85,7 @@ def agrege() -> tuple[dict, list[str]]:
         if not (math.isfinite(v) and v > 0):
             manques.append(f"latence invalide : {v}")
         # pas d'arrondi grossier avant verdict : 2,504 s ne doit pas devenir 2,50 (plafond dur)
-        champs["latency_p95"] = round(v, 6)
+        champs["latency_p95"] = v
     else:
         manques.append("latence : aucune mesure")
 
@@ -95,9 +96,9 @@ def agrege() -> tuple[dict, list[str]]:
         if (not math.isfinite(heures) or heures < 0 or detections < 0
                 or any(float(r["heures"]) < 0 or int(r["detections"]) < 0 for r in fp)):
             manques.append(f"corpus négatif invalide : heures={heures} détections={detections}")
-        champs["fp_hours"] = round(heures, 2)
+        champs["fp_hours"] = heures
         if heures > 0:
-            champs["fp_per_day"] = round(detections * 24 / heures, 6)
+            champs["fp_per_day"] = detections * 24 / heures
         if heures < 8:
             manques.append(f"corpus négatif : {heures:.1f} h / 8 h")
     else:
@@ -112,7 +113,7 @@ def agrege() -> tuple[dict, list[str]]:
         delta = float(bat["armee"]["pct_par_h"]) - float(bat["temoin"]["pct_par_h"])
         if not math.isfinite(delta):
             manques.append(f"batterie invalide : {delta}")
-        champs["battery_delta"] = round(delta, 6)
+        champs["battery_delta"] = delta
     else:
         manques.append(f"batterie : {sorted(bat) or 'aucune nuit'} (témoin + armée requises)")
 
@@ -138,6 +139,11 @@ def table(lignes: list[dict], n: int) -> str:
     return "\n".join(out)
 
 
+def _fmt(x) -> str:
+    """Valeur brute, jamais arrondie (un 2,5000004 ne doit pas devenir 2,5) ; décimal plein, sans exposant."""
+    return format(Decimal(repr(x)), "f") if isinstance(x, float) else str(x)
+
+
 def rendu(champs: dict, manques: list[str], v: str, echecs: list[str], notes: str) -> str:
     ordre = ["date_mesure", "n_essais_1m", "hits_1m", "n_essais_3m", "hits_3m",
              "fp_hours", "fp_per_day", "battery_nights", "battery_delta",
@@ -146,7 +152,7 @@ def rendu(champs: dict, manques: list[str], v: str, echecs: list[str], notes: st
     champs.setdefault("date_mesure", date.today().isoformat())
     champs["verdict_p0"] = v
     champs.setdefault("verdict_repli", "")
-    bloc = "\n".join(f"{k}={champs.get(k, '')}" for k in ordre)
+    bloc = "\n".join(f"{k}={_fmt(champs.get(k, ''))}" for k in ordre)
 
     etat = ["## État du protocole", ""]
     if manques:
@@ -246,7 +252,7 @@ def _check() -> None:
     assert verdict({**complet, "latency_p95": 2.5}, []) == ("GO", []), "plafond dur 2.5 inclus"
     assert verdict({"hits_1m": 1, "hits_3m": 1, "fp_per_day": 0, "battery_delta": 0}, []) == ("", []), "latence absente = sans verdict"
     assert verdict({**complet, "latency_p95": 2.504}, [])[0] == "NOGO", "pas d'arrondi qui franchit le plafond"
-    assert verdict({**complet, "fp_per_day": round(24 * 24 / 11.976, 6)}, [])[0] == "NOGO", "2,004 FP/j != 2,0"
+    assert verdict({**complet, "fp_per_day": 24 * 24 / 11.976}, [])[0] == "NOGO", "2,004 FP/j != 2,0"
     assert p95([1.0]) == 1.0
     assert p95(list(range(1, 21))) == 19, p95(list(range(1, 21)))
     assert p95([]) is None
